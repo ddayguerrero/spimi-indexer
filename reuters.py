@@ -13,15 +13,14 @@ class ReutersCorpus:
     #                  "reut2-020.sgm", "reut2-021.sgm"]
 
     def retrieveDocuments(self):
-        """ Extracts <TITLE> and <BODY> content from Reuters Files"""
+        """ Extract text from <TITLE> and <BODY> tags of Reuters Files"""
+        documents = {}
         for reuter in self.REUTERS_FILES:
             print(reuter)
             reuter_stream = open(self.BASEPATH + reuter, encoding="latin-1")
             reuter_content = reuter_stream.read()
             soup = BeautifulSoup(reuter_content, "html.parser")
             articles = soup.find_all('reuters')
-            documents = {}
-
             for article in articles:
                 newid = article['newid']
                 if not  article.title is None:
@@ -30,6 +29,5 @@ class ReutersCorpus:
                     body = article.body.string
                 words = title + " " + body
                 documents[newid] = words
-        print(documents)
-        print("=== Retrieval Complete ===")
+        print(f"=============== Retrieval Complete - Total Documents: {len(documents)} ===============")
         return documents

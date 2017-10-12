@@ -6,30 +6,40 @@ def preprocess(documents):
     """ Tokenize and normalize documents """
     print(" - Preprocessing documents...")
     nltk.download('stopwords')
-    stops = list(set(stopwords.words("english")))
-    stops_30 = stops[:30]
-    stops_150 = stops[:150]
+    # stops = list(set(stopwords.words("english")))
+    # stops_30 = stops[:30]
+    # stops_150 = stops[:150]
+    print(" -- Tokenizing...")
+    print(" -- Normalizing...")
+    print(" --- 1- Tokens with punctuation characters...")
+    print(" --- 2- Tokens with blank or empty strings...")
+    print(" --- 3- Tokens with unprocessed encoding...")
+    print(" --- 4- Lowercase...")
+    print(" --- 5- Tokens with digits or numbers...")
     for key in documents:
         # Tokenize (case folding is automatically applied within the built-in function)
-        print(" -- Tokenizing...")
         tokens = nltk.word_tokenize(str(documents[key]))
         # Normalize
-        print(" -- Normalizing...")
         processed_tokens = tokens
-        # Design decision: remove punctuation marks
-        print(" --- 1- Remove punctuation characters...")
+        # Design decision: discard tokens with punctuation marks
         processed_tokens = [token for token in processed_tokens if not token in string.punctuation]
-        # Map .lower() to each token
-        print(" --- 2- Applying lower case...")
+        # Design decision: discard blank and empty strings tokens
+        processed_tokens = filter(None, processed_tokens)
+        processed_tokens = [token for token in processed_tokens if not token == "''" and not token == '``']
+        # Design decision: discard tokens with unwanted encoding
+        processed_tokens = [token for token in processed_tokens if not token == "\x03"]
+        # Apply lowercase
         processed_tokens = [i.lower() for i in processed_tokens]
         # Discard token if a containing character is a digit
-        print(" --- 3- Removing numbers...")
         processed_tokens = [token for token in processed_tokens if not any(char.isdigit() for char in token)]
-        # Discard token if it is a English language stopword
-        print(" --- 4- Removing 30 stop words...")
-        processed_tokens = [token for token in processed_tokens if not token in stops_30]
-        print(" --- 5- Removing 150 stop words...")
-        processed_tokens = [token for token in processed_tokens if not token in stops_150]
-        print(" --- 6- Applying Porter Stemmer...")
-        print(processed_tokens)
-    print("=== Preprocessing Complete ===")
+        # Discard token if it is a English language stopword - 30 terms
+        # print(" --- 6- Removing 30 stop words...")
+        # processed_tokens = [token for token in processed_tokens if not token in stops_30]
+        # Discard token if it is a English language stopword - 150 terms
+        # print(" --- 7- Removing 150 stop words...")
+        # processed_tokens = [token for token in processed_tokens if not token in stops_150]
+        # print(" --- 8- Applying Porter Stemmer...")
+        # print(processed_tokens)
+        documents[key] = processed_tokens
+    print("=============== Preprocessing Complete ===============")
+    return documents
