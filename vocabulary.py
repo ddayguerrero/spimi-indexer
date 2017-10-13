@@ -43,3 +43,19 @@ def preprocess(documents):
         documents[key] = processed_tokens
     print("Preprocessing Complete!")
     return documents
+
+def normalize(tokens):
+    # Normalize
+    processed_tokens = tokens
+    # Design decision: discard tokens with punctuation marks
+    processed_tokens = [token for token in processed_tokens if not token in string.punctuation]
+    # Design decision: discard blank and empty strings tokens
+    processed_tokens = filter(None, processed_tokens)
+    processed_tokens = [token for token in processed_tokens if not token == "''" and not token == '``']
+    # Design decision: discard tokens with unwanted encoding
+    processed_tokens = [token for token in processed_tokens if not token == "\x03" and not token == "\x7f"]
+    # Apply lowercase
+    processed_tokens = [i.lower() for i in processed_tokens]
+    # Discard token if a containing character is a digit
+    processed_tokens = [token for token in processed_tokens if not any(char.isdigit() for char in token)]
+    return processed_tokens

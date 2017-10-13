@@ -39,11 +39,11 @@ def sort_terms(termPostingslist):
 
 def write_block_to_disk(termPostingslist, block_number):
     """ Writes index of the block (dictionary + postings list) to disk """
-    print(" -- Writing term-positing list blocks...")
     # Define block
     base_path = 'index_blocks/'
     block_name = 'block-' + str(block_number) + '.txt'
     block = open(base_path + block_name, 'a+')
+    print(" -- Writing term-positing list blocks" + block_name + "...")
     # Write term : posting lists to block
     for index, term in enumerate(termPostingslist):
         # Term - Posting List Format
