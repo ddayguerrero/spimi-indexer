@@ -1,4 +1,6 @@
 import sys
+import ast
+
 from collections import OrderedDict
 
 def spimi_invert(documents, block_size_limit):
@@ -39,7 +41,7 @@ def write_block_to_disk(termPostingslist, block_number):
     # Define block
     base_path = 'index_blocks/'
     block_name = 'block-' + str(block_number) + '.txt'
-    block = open(base_path + block_name, 'a+') # reading and writing
+    block = open(base_path + block_name, 'a+')
     # Write term : posting lists to block
     for index, term in enumerate(termPostingslist):
         # Term - Posting List Format
@@ -47,3 +49,28 @@ def write_block_to_disk(termPostingslist, block_number):
         # e.g. cat:[4,9,21,42]
         block.write(str(term) + ":" + str((termPostingslist[term])) + "\n")
     block.close()
+
+def merge_blocks(blocks):
+    """ Merges SPIMI blocks into final inverted index """
+    empty_blocks = False
+    spimi_index = open('spimi_inverted_index.txt', 'a+')
+    # Collect sectioned (term : postings list) entries from SPIMI blocks
+    temp_index = OrderedDict()
+    for num, block in enumerate(blocks):
+        line = blocks[num].readline() # term:[docID1, docID2, docID3]
+        line_tpl = line.split(':')
+        term = line_tpl[0]
+        postings_list = ast.literal_eval(line_tpl[1])
+        temp_index[num] = {term:postings_list}
+    print(temp_index)
+    # [{term: [postings list]}, blockID]
+    tpl_block = ([[temp_index[i], i] for i in temp_index])
+    # Fetch term postings list with the smallest alphabetical term
+    firstmost_tpl = min(tpl_block, key=lambda t: list(t[0].keys()))
+    # Extract term
+    firstmost_tpl_term = (list(firstmost_tpl[0].keys())[0])
+    print(firstmost_tpl_term)
+    # Fetch all IDs of blocks which contain the same term in their sectioned (term: postings list)
+    firstmost_tpl_block_ids = [block_id for block_id in temp_index if firstmost_tpl_term in [term for term in temp_index[block_id]]]
+    print(firstmost_tpl_block_ids)
+
