@@ -54,13 +54,12 @@ def write_block_to_disk(termPostingslist, block_number):
 
 def merge_blocks(blocks):
     """ Merges SPIMI blocks into final inverted index """
-    print("printing blocks")
-    print(blocks)
     merge_completed = False
     spimi_index = open('spimi_inverted_index.txt', 'a+')
     # Collect sectioned (term : postings list) entries from SPIMI blocks
     temp_index = OrderedDict()
     for num, block in enumerate(blocks):
+        print("-- Reading into memory...", blocks[num].name)
         line = blocks[num].readline() # term:[docID1, docID2, docID3]
         line_tpl = line.split(':')
         term = line_tpl[0]
@@ -97,9 +96,11 @@ def merge_blocks(blocks):
                     # Delete block entry from the temporary sectioned index holder if no line found
                     del temp_index[block_id]
                     blocks.remove(block[0])
+                    print("Finished merging block:", block[0].name)
             else:
                 blocks.remove(block[0])
-        # If all blocks IO streams have been merged
+        # If all block IO streams have been merged
         if not blocks:
             merge_completed = True
+            print("SPIMI completed! All blocks merged into final index: spimi_inverted_index.txt")
     return 0

@@ -26,7 +26,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         block_size_limit = int(sys.argv[1])
     else:
-        block_size_limit = 250000 # default block size (in bytes)
-        # block_size_limit = 1000000 # default block size (in bytes)
-    print(block_size_limit)
+        # block_size_limit = 250000 # default block size (in bytes)
+        block_size_limit = 750000 # default block size (in bytes) 0.75 MB
+    print("Current block size limit: ", block_size_limit)
     compile_inverted_index(block_size_limit)
+    
