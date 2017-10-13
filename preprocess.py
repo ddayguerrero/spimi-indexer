@@ -4,8 +4,8 @@ import string
 
 def preprocess(documents):
     """ Tokenize and normalize documents """
-    print(" - Preprocessing documents...")
-    nltk.download('stopwords')
+    # nltk.download('stopwords')
+    # print(" Fetching stopwords...")
     # stops = list(set(stopwords.words("english")))
     # stops_30 = stops[:30]
     # stops_150 = stops[:150]
@@ -41,5 +41,5 @@ def preprocess(documents):
         # print(" --- 8- Applying Porter Stemmer...")
         # print(processed_tokens)
         documents[key] = processed_tokens
-    print("=============== Preprocessing Complete ===============")
+    print("Preprocessing Complete!")
     return documents

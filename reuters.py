@@ -29,5 +29,5 @@ class ReutersCorpus:
                     body = article.body.string
                 words = title + " " + body
                 documents[newid] = words
-        print(f"=============== Retrieval Complete - Total Documents: {len(documents)} ===============")
+        print(f"Retrieval Complete! - Total Documents: {len(documents)}")
         return documents
