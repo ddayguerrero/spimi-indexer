@@ -27,17 +27,17 @@ def spimi_invert(documents, block_size_limit):
                 dictionary = {}
     print("SPIMI invert complete!")
 
-def sort_terms(termPostingslist):
+def sort_terms(term_postings_list):
     """ Sorts dictionary terms in alphabetical order """
     print(" -- Sorting terms...")
     sorted_dictionary = OrderedDict() # keep track of insertion order
-    sorted_terms = sorted(termPostingslist)
+    sorted_terms = sorted(term_postings_list)
     for term in sorted_terms:
-        result = [int(docIds) for docIds in termPostingslist[term]]
+        result = [int(docIds) for docIds in term_postings_list[term]]
         sorted_dictionary[term] = result
     return sorted_dictionary
 
-def write_block_to_disk(termPostingslist, block_number):
+def write_block_to_disk(term_postings_list, block_number):
     """ Writes index of the block (dictionary + postings list) to disk """
     # Define block
     base_path = 'index_blocks/'
@@ -45,18 +45,18 @@ def write_block_to_disk(termPostingslist, block_number):
     block = open(base_path + block_name, 'a+')
     print(" -- Writing term-positing list block: " + block_name + "...")
     # Write term : posting lists to block
-    for index, term in enumerate(termPostingslist):
+    for index, term in enumerate(term_postings_list):
         # Term - Posting List Format
         # term:[docID1, docID2, docID3]
         # e.g. cat:[4,9,21,42]
-        block.write(str(term) + ":" + str((termPostingslist[term])) + "\n")
+        block.write(str(term) + ":" + str((term_postings_list[term])) + "\n")
     block.close()
 
 def merge_blocks(blocks):
     """ Merges SPIMI blocks into final inverted index """
     merge_completed = False
     spimi_index = open('spimi_inverted_index.txt', 'a+')
-    # Collect sectioned (term : postings list) entries from SPIMI blocks
+    # Collect initial pointers to (term : postings list) entries of each SPIMI blocks
     temp_index = OrderedDict()
     for num, block in enumerate(blocks):
         print("-- Reading into memory...", blocks[num].name)
@@ -66,19 +66,18 @@ def merge_blocks(blocks):
         postings_list = ast.literal_eval(line_tpl[1])
         temp_index[num] = {term:postings_list}
     while not merge_completed:
-        # [{term: [postings list]}, blockID]
+        # Convert into an array of [{term: [postings list]}, blockID]
         tpl_block = ([[temp_index[i], i] for i in temp_index])
         # Fetch the current term postings list with the smallest alphabetical term
         smallest_tpl = min(tpl_block, key=lambda t: list(t[0].keys()))
-        # Extract the smallest term
+        # Extract term
         smallest_tpl_term = (list(smallest_tpl[0].keys())[0])
-        # Fetch all IDs of blocks which contain the same term in their sectioned (term: postings list)
-        # For every block, check if smallest term is in the array of terms from all blocks
+        # Fetch all IDs of blocks that contain the same term in their currently pointed (term: postings list) :
+        # For each block, check if the smallest term is in the array of terms from all blocks then extract the block id
         smallest_tpl_block_ids = [block_id for block_id in temp_index if smallest_tpl_term in [term for term in temp_index[block_id]]]
         # Build a new postings list which contains all postings related to the current smallest term
         # Flatten the array of postings and sort
         smallest_tpl_pl = sorted(sum([pl[smallest_tpl_term] for pl in (temp_index[block_id] for block_id in smallest_tpl_block_ids)], []))
-
         spimi_index.write(str(smallest_tpl_term) + ":" + str(smallest_tpl_pl) + "\n")
 
         # Collect the next sectioned (term : postings list) entries from blocks that contained the previous smallest tpl term

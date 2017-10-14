@@ -1,3 +1,4 @@
+""" Query handler for basic boolean retrieval """
 import ast
 
 from collections import OrderedDict
@@ -6,7 +7,7 @@ from vocabulary import normalize
 def query():
     """ Setup query handler and execute query"""
     query = QueryHandler()
-    user_input = input("Enter your boolean query using && or || exclusively:")
+    user_input = input("Enter your boolean query using && or || exclusively: ")
     result = query.execute(user_input)
     print("Boolean retrieval complete! Result: ", result)
 
@@ -16,6 +17,10 @@ def read_spimi_index():
     spimi_index = OrderedDict()
 
     spimi_index_file = open('spimi_inverted_index.txt', 'r')
+    # Construct SPIMI index
+    # Term - Posting List Format
+    # term:[docID1, docID2, docID3]
+    # e.g. cat:[4,9,21,42]
     for line in spimi_index_file:
         if not line == '':
             line_tpl = line.split(':')
@@ -25,13 +30,14 @@ def read_spimi_index():
     return spimi_index
 
 class QueryHandler:
-    """Handles boolean retrieval queries"""
+    """Handles basic conjuction and disjunction boolean retrieval queries"""
     def __init__(self):
         self.spimi_index = read_spimi_index()
         self.terms = []
 
     def execute(self, queryInput):
         """Execute query"""
+        # Parse input and determine type of boolean query
         and_index = queryInput.index('&&') if '&&' in queryInput else -1
         or_index = queryInput.index('||') if '||' in queryInput else -1
         if (and_index > 0) and (or_index < 0):
@@ -55,9 +61,9 @@ class QueryHandler:
                 tpl.append(self.spimi_index[term])
 
         if query_type == 'AND':
-            query_result = set(tpl[0]).intersection(*tpl)
+            query_result = set(tpl[0]).intersection(*tpl) # Intersection
         else:
-            query_result = []
+            query_result = sorted(list(set(tpl[0]).union(*tpl))) # Union
         return list(query_result)
 
 if __name__ == '__main__':
