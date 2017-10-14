@@ -1,13 +1,14 @@
 import ast
 
 from collections import OrderedDict
+from vocabulary import normalize
 
 def query():
-    """ """
+    """ Setup query handler and execute query"""
     query = QueryHandler()
     user_input = input("Enter your boolean query using && or || exclusively:")
-    print("Executing: " + user_input + "...")
     result = query.execute(user_input)
+    print("Boolean retrieval complete! Result: ", result)
 
 def read_spimi_index():
     """ Reads and the SPIMI inverted index into memory"""
@@ -24,31 +25,40 @@ def read_spimi_index():
     return spimi_index
 
 class QueryHandler:
-    """Handle boolean retrieval queries"""
+    """Handles boolean retrieval queries"""
     def __init__(self):
         self.spimi_index = read_spimi_index()
+        self.terms = []
 
-    def execute(self, query):
+    def execute(self, queryInput):
         """Execute query"""
-        self.parseQuery(query)
-        print("Boolean retrieval complete!")
-
-    def parseQuery(self, queryInput):
-        """Validate and parse query"""
         and_index = queryInput.index('&&') if '&&' in queryInput else -1
         or_index = queryInput.index('||') if '||' in queryInput else -1
         if (and_index > 0) and (or_index < 0):
-            print("AND query")
             query_type = 'AND'
+            seperator = '&&'
         elif (or_index > 0) and (and_index < 0):
-            print('OR query')
             query_type = 'OR'
+            seperator = '||'
         else:
             print('Invalid query')
             return 0
 
-        test = queryInput.split(' || ')
-        print(test, query_type)
+        # Extract terms and apply same preprocessing used for creating the SPIMI index
+        query_terms = queryInput.strip().replace(" ", "").split(seperator)
+        self.terms = normalize(query_terms)
+
+        # Collect postings lists of query terms
+        tpl = []
+        for term in self.terms:
+            if term in self.spimi_index:
+                tpl.append(self.spimi_index[term])
+
+        if query_type == 'AND':
+            query_result = set(tpl[0]).intersection(*tpl)
+        else:
+            query_result = []
+        return list(query_result)
 
 if __name__ == '__main__':
     query()

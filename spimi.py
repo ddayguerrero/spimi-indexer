@@ -43,7 +43,7 @@ def write_block_to_disk(termPostingslist, block_number):
     base_path = 'index_blocks/'
     block_name = 'block-' + str(block_number) + '.txt'
     block = open(base_path + block_name, 'a+')
-    print(" -- Writing term-positing list blocks" + block_name + "...")
+    print(" -- Writing term-positing list block: " + block_name + "...")
     # Write term : posting lists to block
     for index, term in enumerate(termPostingslist):
         # Term - Posting List Format
