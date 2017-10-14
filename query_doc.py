@@ -7,9 +7,9 @@ from vocabulary import normalize
 def query():
     """ Setup query handler and execute query"""
     query = QueryHandler()
-    user_input = input("Enter your boolean query using && or || exclusively: ")
-    result = query.execute(user_input)
-    print("Boolean retrieval complete! Result: ", result)
+    # user_input = input("Enter your boolean query using && or || exclusively: ")
+    # result = query.execute(user_input)
+    #print("Boolean retrieval complete! Result: ", result)
 
 def read_spimi_index():
     """ Reads and the SPIMI inverted index into memory"""
@@ -23,10 +23,19 @@ def read_spimi_index():
     # e.g. cat:[4,9,21,42]
     for line in spimi_index_file:
         if not line == '':
-            line_tpl = line.split(':')
+            line_tpl = line.rsplit(':', 1)
             term = line_tpl[0]
             postings_list = ast.literal_eval(line_tpl[1])
             spimi_index.update({term: postings_list})
+
+    print("=============== Statistics ===============")
+    print("Size of index:", len(spimi_index))
+    non_positional_postings_count = 0
+    for i in spimi_index:
+        non_positional_postings_count += len(spimi_index[i])
+    print("Number of non-positional postings: ", non_positional_postings_count)
+    print("==========================================")
+
     return spimi_index
 
 class QueryHandler:

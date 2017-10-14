@@ -7,7 +7,7 @@ from collections import OrderedDict
 def spimi_invert(documents, block_size_limit):
     """ Applies the Single-pass in-memory indexing algorithm """
     block_number = 0
-    dictionary = {} # (term-postingsList)
+    dictionary = {} # (term - postings list)
     for index, docID in enumerate(documents):
         for term in documents[docID]:
             # If term occurs for the first time
@@ -61,7 +61,7 @@ def merge_blocks(blocks):
     for num, block in enumerate(blocks):
         print("-- Reading into memory...", blocks[num].name)
         line = blocks[num].readline() # term:[docID1, docID2, docID3]
-        line_tpl = line.split(':')
+        line_tpl = line.rsplit(':', 1)
         term = line_tpl[0]
         postings_list = ast.literal_eval(line_tpl[1])
         temp_index[num] = {term:postings_list}
@@ -87,10 +87,18 @@ def merge_blocks(blocks):
             if block[0]:
                 line = block[0].readline()
                 if not line == '':
-                    line_tpl = line.split(':')
+                    line_tpl = line.rsplit(':', 1)
                     term = line_tpl[0]
                     postings_list = ast.literal_eval(line_tpl[1])
-                    temp_index[block_id] = {term:postings_list}
+                    if not type(postings_list) == list:
+                        print(type(postings_list))
+                        print("pl", postings_list)
+                        print("blockid", block_id)
+                        result = [postings_list]
+                        print("result", result)
+                        temp_index[block_id] = {term:result}
+                    else:
+                        temp_index[block_id] = {term:postings_list}
                 else:
                     # Delete block entry from the temporary sectioned index holder if no line found
                     del temp_index[block_id]
