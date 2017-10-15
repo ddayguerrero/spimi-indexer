@@ -9,7 +9,7 @@ def query():
     query = QueryHandler()
     user_input = input("Enter your boolean query using && or || exclusively: ")
     result_documents = query.execute(user_input)
-    print("Boolean retrieval complete! Result:", result_documents)
+    print("Boolean retrieval complete - Result:", result_documents)
 
 def read_spimi_index():
     """ Reads and the SPIMI inverted index into memory"""
@@ -72,21 +72,61 @@ class QueryHandler:
             # Extract terms and apply same preprocessing used for creating the SPIMI index
             query_terms = queryInput.strip().replace(" ", "").split(seperator)
             print('--- Multiple Keywords Query')
-            print('--- Terms:', query_terms)
             terms = normalize(query_terms)
             print('--- Terms:', query_terms)
 
             # Collect postings lists of query terms
-            tpl = []
+            tpls = []
             for term in terms:
                 if term in self.spimi_index:
-                    tpl.append(self.spimi_index[term])
+                    tpls.append(self.spimi_index[term])
 
             if query_type == 'AND':
-                query_result = set(tpl[0]).intersection(*tpl) # Intersection
+                query_result = intersect(tpls)
+                #query_result = set(tpl[0]).intersection(*tpl) # Intersection
+                print(query_result)
             else:
-                query_result = sorted(list(set(tpl[0]).union(*tpl))) # Union
-            return list(query_result)
+                query_result = sorted(list(set(tpls[0]).union(*tpls))) # Union
+            return query_result
+
+def intersect(term_postings_lists):
+    sort_doc_tpl = sorted(term_postings_lists)
+    sort_length_tpl = sorted(sort_doc_tpl, key=len)
+    result = min(term_postings_lists, key=len) # shortest
+    remainder = sort_length_tpl[1:]
+    while not remainder is None and not result is None:
+        result = intersect_rest(result, remainder[0])
+        print("result", result)
+        remainder = remainder[1:]
+        print("remainder", remainder)
+        if not remainder:
+            remainder = None
+    return result
+
+def intersect_rest(tpl1, tpl2):
+    answer = []
+    iter_tpl1 = iter(tpl1)
+    iter_tpl2 = iter(tpl2)
+    doc_id1 = next(iter_tpl1, None)
+    doc_id2 = next(iter_tpl2, None)
+    while not doc_id1 is None and not doc_id2 is None:
+        print("newdoc_id1", doc_id1)
+        print("newdoc_id2", doc_id2)
+        if doc_id1 == doc_id2:
+            answer.append(doc_id1)
+            doc_id1 = next(iter_tpl1, None)
+            doc_id2 = next(iter_tpl2, None)
+        elif doc_id1 < doc_id2:
+            doc_id1 = next(iter_tpl1, None)
+            print("doc_id1", doc_id1)
+        else:
+            doc_id2 = next(iter_tpl2, None)
+            print("doc_id2", doc_id2)
+    print("Intersect of two", answer)
+    if not answer:
+        return None
+    return answer
+
 
 if __name__ == '__main__':
     query()
