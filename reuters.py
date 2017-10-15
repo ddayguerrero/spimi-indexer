@@ -22,10 +22,12 @@ class ReutersCorpus:
             soup = BeautifulSoup(reuter_content, "html.parser")
             articles = soup.find_all('reuters')
             for article in articles:
+                body = ""
+                words = ""
                 newid = article['newid']
-                if not  article.title is None:
+                if not article.title is None:
                     title = article.title.string
-                if not  article.body is None:
+                if not article.body is None:
                     body = article.body.string
                 words = title + " " + body
                 documents[newid] = words

@@ -7,6 +7,7 @@ from collections import OrderedDict
 def spimi_invert(documents, block_size_limit):
     """ Applies the Single-pass in-memory indexing algorithm """
     block_number = 0
+    documents_count = len(documents)
     dictionary = {} # (term - postings list)
     for index, docID in enumerate(documents):
         for term in documents[docID]:
@@ -19,12 +20,12 @@ def spimi_invert(documents, block_size_limit):
                 if docID not in dictionary[term]:
                     # Add a posting (docID) to the existing posting list of the term
                     dictionary[term].append(docID)
-            if sys.getsizeof(dictionary) > block_size_limit:
-                temp_dict = sort_terms(dictionary)
-                write_block_to_disk(temp_dict, block_number)
-                temp_dict = {}
-                block_number += 1
-                dictionary = {}
+        if sys.getsizeof(dictionary) > block_size_limit or (index == documents_count-1):
+            temp_dict = sort_terms(dictionary)
+            write_block_to_disk(temp_dict, block_number)
+            temp_dict = {}
+            block_number += 1
+            dictionary = {}
     print("SPIMI invert complete!")
 
 def sort_terms(term_postings_list):
@@ -90,15 +91,7 @@ def merge_blocks(blocks):
                     line_tpl = line.rsplit(':', 1)
                     term = line_tpl[0]
                     postings_list = ast.literal_eval(line_tpl[1])
-                    if not type(postings_list) == list:
-                        print(type(postings_list))
-                        print("pl", postings_list)
-                        print("blockid", block_id)
-                        result = [postings_list]
-                        print("result", result)
-                        temp_index[block_id] = {term:result}
-                    else:
-                        temp_index[block_id] = {term:postings_list}
+                    temp_index[block_id] = {term:postings_list}
                 else:
                     # Delete block entry from the temporary sectioned index holder if no line found
                     del temp_index[block_id]

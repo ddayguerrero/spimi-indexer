@@ -13,4 +13,6 @@ def deleteblocks():
 if __name__ == '__main__':
     print('Deleting existing SPIMI blocks...')
     deleteblocks()
+    print('Clearing SPIMI inverted index...')
+    open('spimi_inverted_index.txt', 'w').close()
     print('Complete!')
