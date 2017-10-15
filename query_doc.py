@@ -48,14 +48,13 @@ class QueryHandler:
         # Parse input and determine type of boolean query
         if len(queryInput.strip().split()) == 1:
             print('--- Single Keyword Query')
-            is_single_keyword = True
             single_keyword = queryInput.strip().split()[0]
             print('--- Term:', single_keyword)
             if single_keyword in self.spimi_index:
                 return self.spimi_index[single_keyword]
             else:
                 print('No documents found!')
-                return []
+                return None
         else:
             and_index = queryInput.index('&&') if '&&' in queryInput else -1
             or_index = queryInput.index('||') if '||' in queryInput else -1
@@ -67,7 +66,7 @@ class QueryHandler:
                 seperator = '||'
             else:
                 print('Invalid query')
-                return []
+                return None
 
             # Extract terms and apply same preprocessing used for creating the SPIMI index
             query_terms = queryInput.strip().replace(" ", "").split(seperator)
@@ -80,28 +79,36 @@ class QueryHandler:
             for term in terms:
                 if term in self.spimi_index:
                     tpls.append(self.spimi_index[term])
+                else:
+                    tpls.append([])
 
             if query_type == 'AND':
                 query_result = intersect(tpls)
                 #query_result = set(tpl[0]).intersection(*tpl) # Intersection
-                print(query_result)
             else:
                 #query_result = sorted(list(set(tpls[0]).union(*tpls))) # Union
                 query_result = union(tpls)
-                print(query_result)
             return query_result
 
 def intersect(term_postings_lists):
     """ Computes conjunctive queries for the set of tls containing the input list of terms """
+    if len(term_postings_lists) < 2:
+        return None
     sort_doc_tpl = sorted(term_postings_lists)
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len) # shortest
     remainder = sort_length_tpl[1:]
+    print("result", result)
+    print("remainder", remainder)
+    if not remainder:
+        remainder = None
+    if not result:
+        result = None
     while not remainder is None and not result is None:
         result = intersect_rest(result, remainder[0])
-        # print("result", result)
+        print("result", result)
         remainder = remainder[1:]
-        # print("remainder", remainder)
+        print("remainder", remainder)
         if not remainder:
             remainder = None
     return result
@@ -114,19 +121,15 @@ def intersect_rest(tpl1, tpl2):
     doc_id1 = next(iter_tpl1, None)
     doc_id2 = next(iter_tpl2, None)
     while not doc_id1 is None and not doc_id2 is None:
-        # print("newdoc_id1", doc_id1)
-        # print("newdoc_id2", doc_id2)
         if doc_id1 == doc_id2:
             answer.append(doc_id1)
             doc_id1 = next(iter_tpl1, None)
             doc_id2 = next(iter_tpl2, None)
         elif doc_id1 < doc_id2:
             doc_id1 = next(iter_tpl1, None)
-            # print("doc_id1", doc_id1)
         else:
             doc_id2 = next(iter_tpl2, None)
-            # print("doc_id2", doc_id2)
-    # print("Intersect of two", answer)
+    print("Intersection of two", answer)
     if not answer:
         return None
     return answer
@@ -137,7 +140,13 @@ def union(term_postings_lists):
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len)
     remainder = sort_length_tpl[1:]
-    while not remainder is None and not result is None:
+    print("result", result)
+    print("remainder", remainder)
+    if not remainder:
+        remainder = None
+    if not result:
+        result = None
+    while not remainder is None:
         result = union_rest(result, remainder[0])
         print("result", result)
         remainder = remainder[1:]
@@ -149,13 +158,17 @@ def union(term_postings_lists):
 def union_rest(tpl1, tpl2):
     """ Computes union between two term postings list """
     answer = []
-    iter_tpl1 = iter(tpl1)
-    iter_tpl2 = iter(tpl2)
-    doc_id1 = next(iter_tpl1, None)
-    doc_id2 = next(iter_tpl2, None)
+    if not tpl1:
+        doc_id1 = None
+    else:
+        iter_tpl1 = iter(tpl1)
+        doc_id1 = next(iter_tpl1, None)
+    if not tpl2:
+        doc_id2 = None
+    else:
+        iter_tpl2 = iter(tpl2)
+        doc_id2 = next(iter_tpl2, None)
     while not doc_id1 is None or not doc_id2 is None:
-        # print("newdoc_id1", doc_id1)
-        # print("newdoc_id2", doc_id2)
         if doc_id1 is None:
             answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
@@ -164,7 +177,7 @@ def union_rest(tpl1, tpl2):
             doc_id2 = next(iter_tpl2, None)
         elif doc_id1 == doc_id2:
             answer.append(doc_id1)
-            doc_id2 = next(iter_tpl2, None)
+            doc_id1 = next(iter_tpl1, None)
             doc_id2 = next(iter_tpl2, None)
         elif doc_id1 < doc_id2:
             answer.append(doc_id1)
@@ -172,7 +185,7 @@ def union_rest(tpl1, tpl2):
         else:
             answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
-    print("Intersect of two", answer)
+    print("Union of two", answer)
     if not answer:
         return None
     return answer
