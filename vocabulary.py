@@ -6,7 +6,7 @@ import ast
 def preprocess(documents):
     """ Tokenize and normalize documents """
     # nltk.download('stopwords')
-    # print(" Fetching stopwords...")
+    print(" Fetching stopwords...")
     # stops = list(set(stopwords.words("english")))
     # stops_30 = stops[:30]
     # stops_150 = stops[:150]
@@ -22,7 +22,7 @@ def preprocess(documents):
     for key in documents:
         # Tokenize (case folding is automatically applied within the built-in function)
         tokens = nltk.word_tokenize(str(documents[key]))
-        # processed_tokens = normalize(tokens, stops_30, stops_150)
+        #processed_tokens = normalize(tokens, stops_30, stops_150)
         processed_tokens = normalize(tokens)
         documents[key] = processed_tokens
         #documents[key] = tokens
@@ -34,13 +34,13 @@ def normalize(tokens):
     processed_tokens = tokens
     # Design decision: discard tokens with punctuation marks
     processed_tokens = [token for token in processed_tokens if not token in string.punctuation]
-    # # Design decision: discard blank and empty strings tokens
-    # processed_tokens = filter(None, processed_tokens)
+    # Design decision: discard blank and empty strings tokens
+    processed_tokens = filter(None, processed_tokens)
     processed_tokens = [token for token in processed_tokens if not token == "''" and not token == '``']
-    # # Design decision: discard tokens with invalid code points from UTF-8 encoding
+    # Design decision: discard tokens with invalid code points from UTF-8 encoding
     processed_tokens = [token for token in processed_tokens if not token == "\x03" and not token == "\x7f"]
     # Discard token if a containing character is a digit
-    processed_tokens = [token for token in processed_tokens if not any(char.isdigit() for char in token)]
+    # processed_tokens = [token for token in processed_tokens if not any(char.isdigit() for char in token)]
     # Discard token if it is convertable to a number (int or float)
     processed_tokens = [token for token in processed_tokens if not is_number(token)]
     # Apply lowercase
