@@ -86,16 +86,59 @@ class QueryHandler:
                 #query_result = set(tpl[0]).intersection(*tpl) # Intersection
                 print(query_result)
             else:
-                query_result = sorted(list(set(tpls[0]).union(*tpls))) # Union
+                #query_result = sorted(list(set(tpls[0]).union(*tpls))) # Union
+                query_result = union(tpls)
+                print(query_result)
             return query_result
 
 def intersect(term_postings_lists):
+    """ Computes conjunctive queries for the set of tls containing the input list of terms """
     sort_doc_tpl = sorted(term_postings_lists)
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len) # shortest
     remainder = sort_length_tpl[1:]
     while not remainder is None and not result is None:
         result = intersect_rest(result, remainder[0])
+        # print("result", result)
+        remainder = remainder[1:]
+        # print("remainder", remainder)
+        if not remainder:
+            remainder = None
+    return result
+
+def intersect_rest(tpl1, tpl2):
+    """ Computes intersection between two term postings list"""
+    answer = []
+    iter_tpl1 = iter(tpl1)
+    iter_tpl2 = iter(tpl2)
+    doc_id1 = next(iter_tpl1, None)
+    doc_id2 = next(iter_tpl2, None)
+    while not doc_id1 is None and not doc_id2 is None:
+        # print("newdoc_id1", doc_id1)
+        # print("newdoc_id2", doc_id2)
+        if doc_id1 == doc_id2:
+            answer.append(doc_id1)
+            doc_id1 = next(iter_tpl1, None)
+            doc_id2 = next(iter_tpl2, None)
+        elif doc_id1 < doc_id2:
+            doc_id1 = next(iter_tpl1, None)
+            # print("doc_id1", doc_id1)
+        else:
+            doc_id2 = next(iter_tpl2, None)
+            # print("doc_id2", doc_id2)
+    # print("Intersect of two", answer)
+    if not answer:
+        return None
+    return answer
+
+def union(term_postings_lists):
+    """ Computes disjunctive queries for the set of tls containing the input list of terms """
+    sort_doc_tpl = sorted(term_postings_lists)
+    sort_length_tpl = sorted(sort_doc_tpl, key=len)
+    result = min(term_postings_lists, key=len)
+    remainder = sort_length_tpl[1:]
+    while not remainder is None and not result is None:
+        result = union_rest(result, remainder[0])
         print("result", result)
         remainder = remainder[1:]
         print("remainder", remainder)
@@ -103,30 +146,36 @@ def intersect(term_postings_lists):
             remainder = None
     return result
 
-def intersect_rest(tpl1, tpl2):
+def union_rest(tpl1, tpl2):
+    """ Computes union between two term postings list """
     answer = []
     iter_tpl1 = iter(tpl1)
     iter_tpl2 = iter(tpl2)
     doc_id1 = next(iter_tpl1, None)
     doc_id2 = next(iter_tpl2, None)
-    while not doc_id1 is None and not doc_id2 is None:
-        print("newdoc_id1", doc_id1)
-        print("newdoc_id2", doc_id2)
-        if doc_id1 == doc_id2:
+    while not doc_id1 is None or not doc_id2 is None:
+        # print("newdoc_id1", doc_id1)
+        # print("newdoc_id2", doc_id2)
+        if doc_id1 is None:
+            answer.append(doc_id2)
+            doc_id2 = next(iter_tpl2, None)
+        elif doc_id2 is None:
             answer.append(doc_id1)
-            doc_id1 = next(iter_tpl1, None)
+            doc_id2 = next(iter_tpl2, None)
+        elif doc_id1 == doc_id2:
+            answer.append(doc_id1)
+            doc_id2 = next(iter_tpl2, None)
             doc_id2 = next(iter_tpl2, None)
         elif doc_id1 < doc_id2:
+            answer.append(doc_id1)
             doc_id1 = next(iter_tpl1, None)
-            print("doc_id1", doc_id1)
         else:
+            answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
-            print("doc_id2", doc_id2)
     print("Intersect of two", answer)
     if not answer:
         return None
     return answer
-
 
 if __name__ == '__main__':
     query()
