@@ -22,10 +22,16 @@ def preprocess(documents):
     for key in documents:
         # Tokenize (case folding is automatically applied within the built-in function)
         tokens = nltk.word_tokenize(str(documents[key]))
-        #processed_tokens = normalize(tokens, stops_30, stops_150)
+        # processed_tokens = normalize(tokens, stops_30, stops_150)
         processed_tokens = normalize(tokens)
         documents[key] = processed_tokens
         #documents[key] = tokens
+
+    non_positional_postings_count = 1
+    for index, val in enumerate(documents):
+        non_positional_postings_count += len(documents[val])
+    print("Tokens - Number of positions entries in postings: ", non_positional_postings_count)
+
     print("Preprocessing Complete!")
     return documents
 

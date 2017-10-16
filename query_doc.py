@@ -140,17 +140,17 @@ def union(term_postings_lists):
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len)
     remainder = sort_length_tpl[1:]
-    print("result", result)
-    print("remainder", remainder)
+    print("result1", result)
+    print("remainder1", remainder)
     if not remainder:
         remainder = None
     if not result:
         result = None
     while not remainder is None:
         result = union_rest(result, remainder[0])
-        print("result", result)
+        print("result2", result)
         remainder = remainder[1:]
-        print("remainder", remainder)
+        print("remainder2", remainder)
         if not remainder:
             remainder = None
     return result
@@ -168,13 +168,17 @@ def union_rest(tpl1, tpl2):
     else:
         iter_tpl2 = iter(tpl2)
         doc_id2 = next(iter_tpl2, None)
+    print("doc_id1", doc_id1)
+    print("doc_id2", doc_id2)
     while not doc_id1 is None or not doc_id2 is None:
+        print("doc_id3", doc_id1)
+        print("doc_id3", doc_id2)
         if doc_id1 is None:
             answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
         elif doc_id2 is None:
             answer.append(doc_id1)
-            doc_id2 = next(iter_tpl2, None)
+            doc_id1 = next(iter_tpl1, None)
         elif doc_id1 == doc_id2:
             answer.append(doc_id1)
             doc_id1 = next(iter_tpl1, None)
