@@ -10,6 +10,9 @@ def query():
     user_input = input("Enter your boolean query using && or || exclusively: ")
     result_documents = query.execute(user_input)
     print("Boolean retrieval complete - Result:", result_documents)
+    if not result_documents is None:
+        num_results = len(result_documents)
+        print("Amount of documents found:", num_results)
 
 def read_spimi_index():
     """ Reads and the SPIMI inverted index into memory"""
@@ -67,7 +70,7 @@ class QueryHandler:
                 query_type = 'OR'
                 seperator = '||'
             else:
-                print('Invalid query')
+                print('Invalid query!')
                 return None
 
             # Extract terms and apply same preprocessing used for creating the SPIMI index
@@ -100,17 +103,17 @@ def intersect(term_postings_lists):
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len) # shortest
     remainder = sort_length_tpl[1:]
-    print("result", result)
-    print("remainder", remainder)
+    # print("result", result)
+    # print("remainder", remainder)
     if not remainder:
         remainder = None
     if not result:
         result = None
     while not remainder is None and not result is None:
         result = intersect_rest(result, remainder[0])
-        print("result", result)
+        # print("result", result)
         remainder = remainder[1:]
-        print("remainder", remainder)
+        # print("remainder", remainder)
         if not remainder:
             remainder = None
     return result
@@ -131,7 +134,7 @@ def intersect_rest(tpl1, tpl2):
             doc_id1 = next(iter_tpl1, None)
         else:
             doc_id2 = next(iter_tpl2, None)
-    print("Intersection of two", answer)
+    # print("Intersection of two", answer)
     if not answer:
         return None
     return answer
@@ -142,17 +145,17 @@ def union(term_postings_lists):
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len)
     remainder = sort_length_tpl[1:]
-    print("result1", result)
-    print("remainder1", remainder)
+    # print("result1", result)
+    # print("remainder1", remainder)
     if not remainder:
         remainder = None
     if not result:
         result = None
     while not remainder is None:
         result = union_rest(result, remainder[0])
-        print("result2", result)
+        # print("result2", result)
         remainder = remainder[1:]
-        print("remainder2", remainder)
+        # print("remainder2", remainder)
         if not remainder:
             remainder = None
     return result
@@ -170,11 +173,11 @@ def union_rest(tpl1, tpl2):
     else:
         iter_tpl2 = iter(tpl2)
         doc_id2 = next(iter_tpl2, None)
-    print("doc_id1", doc_id1)
-    print("doc_id2", doc_id2)
+    # print("doc_id1", doc_id1)
+    # print("doc_id2", doc_id2)
     while not doc_id1 is None or not doc_id2 is None:
-        print("doc_id3", doc_id1)
-        print("doc_id3", doc_id2)
+        # print("doc_id3", doc_id1)
+        # print("doc_id3", doc_id2)
         if doc_id1 is None:
             answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
@@ -191,7 +194,7 @@ def union_rest(tpl1, tpl2):
         else:
             answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
-    print("Union of two", answer)
+    # print("Union of two", answer)
     if not answer:
         return None
     return answer
