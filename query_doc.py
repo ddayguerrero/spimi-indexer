@@ -50,8 +50,10 @@ class QueryHandler:
             print('--- Single Keyword Query')
             single_keyword = queryInput.strip().split()[0]
             print('--- Term:', single_keyword)
-            if single_keyword in self.spimi_index:
-                return self.spimi_index[single_keyword]
+            single_keyword_normalized = normalize([single_keyword])
+            keyword = single_keyword_normalized[0]
+            if keyword in self.spimi_index:
+                return self.spimi_index[keyword]
             else:
                 print('No documents found!')
                 return None
