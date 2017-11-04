@@ -126,11 +126,11 @@ def intersect_rest(tpl1, tpl2):
     doc_id1 = next(iter_tpl1, None)
     doc_id2 = next(iter_tpl2, None)
     while not doc_id1 is None and not doc_id2 is None:
-        if doc_id1 == doc_id2:
+        if doc_id1[0] == doc_id2[0]:
             answer.append(doc_id1)
             doc_id1 = next(iter_tpl1, None)
             doc_id2 = next(iter_tpl2, None)
-        elif doc_id1 < doc_id2:
+        elif doc_id1[0] < doc_id2[0]:
             doc_id1 = next(iter_tpl1, None)
         else:
             doc_id2 = next(iter_tpl2, None)
@@ -184,11 +184,11 @@ def union_rest(tpl1, tpl2):
         elif doc_id2 is None:
             answer.append(doc_id1)
             doc_id1 = next(iter_tpl1, None)
-        elif doc_id1 == doc_id2:
+        elif doc_id1[0] == doc_id2[0]:
             answer.append(doc_id1)
             doc_id1 = next(iter_tpl1, None)
             doc_id2 = next(iter_tpl2, None)
-        elif doc_id1 < doc_id2:
+        elif doc_id1[0] < doc_id2[0]:
             answer.append(doc_id1)
             doc_id1 = next(iter_tpl1, None)
         else:

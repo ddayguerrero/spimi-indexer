@@ -23,6 +23,7 @@ class ReutersCorpus:
             articles = soup.find_all('reuters')
             for article in articles:
                 body = ""
+                title = ""
                 words = ""
                 newid = article['newid']
                 if not article.title is None:
