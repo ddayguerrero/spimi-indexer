@@ -86,7 +86,7 @@ class QueryHandler:
                     tpls.append(self.spimi_index[term])
                 else:
                     tpls.append([])
-
+            print(tpls)
             if query_type == 'AND':
                 query_result = intersect(tpls)
                 #query_result = set(tpl[0]).intersection(*tpl) # Intersection

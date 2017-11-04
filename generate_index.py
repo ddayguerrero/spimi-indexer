@@ -21,6 +21,10 @@ def compile_inverted_index(block_size_limit):
     print("=============== Merging SPIMI blocks into final inverted index... ===============")
     spimi_blocks = [open('index_blocks/'+block) for block in listdir('index_blocks/')]
     merge_blocks(spimi_blocks)
+    # while True: # keep running the program
+    #     docID_input = input("Enter document ID for lookup:")
+    #     print("You entered:", docID_input)
+    #     print(documents[docID_input])
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

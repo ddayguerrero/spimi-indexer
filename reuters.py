@@ -4,7 +4,7 @@ import os
 # Reuters21578 Preprocessing
 class ReutersCorpus:
     BASEPATH = "reuters21578/"
-    # REUTERS_FILES = ["reut2-000.sgm"]
+    #REUTERS_FILES = ["reut2-000.sgm"]
     REUTERS_FILES = ["reut2-000.sgm", "reut2-001.sgm", "reut2-002.sgm", "reut2-003.sgm",
                      "reut2-004.sgm", "reut2-005.sgm", "reut2-006.sgm", "reut2-007.sgm",
                      "reut2-008.sgm", "reut2-009.sgm", "reut2-010.sgm", "reut2-011.sgm",

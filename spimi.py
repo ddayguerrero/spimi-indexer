@@ -1,6 +1,7 @@
 import sys
 import ast
 import re
+import collections
 
 from collections import OrderedDict
 
@@ -15,11 +16,13 @@ def spimi_invert(documents, block_size_limit):
             if term not in dictionary:
                 # Add term to dictionary, create new postings list, and add docID
                 dictionary[term] = [docID]
+            # else:
+            #     # If term has a subsequent occurence
+            #     if docID not in dictionary[term]:
+            #         # Add a posting (docID) to the existing posting list of the term
+            #         dictionary[term].append(docID)
             else:
-                # If term has a subsequent occurence
-                if docID not in dictionary[term]:
-                    # Add a posting (docID) to the existing posting list of the term
-                    dictionary[term].append(docID)
+                dictionary[term].append(docID)
         if sys.getsizeof(dictionary) > block_size_limit or (index == documents_count-1):
             temp_dict = sort_terms(dictionary)
             write_block_to_disk(temp_dict, block_number)
@@ -35,8 +38,16 @@ def sort_terms(term_postings_list):
     sorted_terms = sorted(term_postings_list)
     for term in sorted_terms:
         result = [int(docIds) for docIds in term_postings_list[term]]
-        sorted_dictionary[term] = result
+        result_tftd = calculate_tftd(result)
+        sorted_dictionary[term] = result_tftd
     return sorted_dictionary
+
+def calculate_tftd(pl_with_duplicates):
+    """ Add term frequency of term in each document """
+    # print(pl_with_duplicates)
+    counter = collections.Counter(pl_with_duplicates)
+    pl_tftd = [[int(docId), counter[docId]] for docId in counter.keys()]
+    return pl_tftd
 
 def write_block_to_disk(term_postings_list, block_number):
     """ Writes index of the block (dictionary + postings list) to disk """
