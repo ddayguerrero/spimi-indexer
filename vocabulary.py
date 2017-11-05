@@ -6,7 +6,7 @@ import ast
 def preprocess(documents):
     """ Tokenize and normalize documents """
     # nltk.download('stopwords')
-    print(" Fetching stopwords...")
+    print("Fetching stopwords...")
     # stops = list(set(stopwords.words("english")))
     # stops_30 = stops[:30]
     # stops_150 = stops[:150]
@@ -31,7 +31,6 @@ def preprocess(documents):
     for index, val in enumerate(documents):
         non_positional_postings_count += len(documents[val])
     print("Tokens - Number of positions entries in postings: ", non_positional_postings_count)
-
     print("Preprocessing Complete!")
     return documents
 
