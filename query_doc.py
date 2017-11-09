@@ -23,8 +23,9 @@ def query_bm25():
     """ Setup BM25 ranking algorithm """
     result_query, result_documents = retrieve_result_set()
     if not result_documents is None:
-        QUERYHANDLER.compute_bm25(result_query, result_documents)
-
+        document_scores = QUERYHANDLER.compute_bm25(result_query, result_documents)
+        for key, value in document_scores:
+            print("Document: %s - Score: %s" % (key, value))
 
 
 def read_spimi_index():
@@ -64,7 +65,7 @@ class QueryHandler:
 
     def compute_bm25(self, query, documents):
         """ Okapi-BM25: rank documents according to their relevance to a given query """
-        print("Okapi-BM25")
+        print(("====================== Okapi-BM25 ======================="))
         result_scores = OrderedDict()
         l_ave = sum(len(document) for document in self.documents) / len(self.documents) # average length of all documents
         # print("l_ave", l_ave)
@@ -85,8 +86,8 @@ class QueryHandler:
                     result_scores[doc_id[0]] += (idf * tftd)
                 else:
                     result_scores[doc_id[0]] = (idf * tftd)
-        print(result_scores)
-        return documents
+        result_scores = sorted(result_scores.items(), key=lambda x:x[1], reverse=True) # sort documents by decreasing score value
+        return result_scores
 
     def execute(self, queryInput):
         """Execute query"""
@@ -117,7 +118,7 @@ class QueryHandler:
 
             # Extract terms and apply same preprocessing used for creating the SPIMI index
             query_terms = queryInput.strip().replace(" ", "").split(seperator)
-            print('--- Multiple Keywords Query')
+            print('--- Multiple Keyword Query')
             terms = normalize(query_terms)
             print('--- Terms:', query_terms)
 
@@ -126,7 +127,7 @@ class QueryHandler:
             for term in terms:
                 if term in self.spimi_index:
                     tpls.append(self.spimi_index[term])
-                    print(term, self.spimi_index[term])
+                    # print(term, self.spimi_index[term])
                 else:
                     tpls.append([])
             if query_type == 'AND':
@@ -145,9 +146,9 @@ def compute_idf(n, dft):
 def compute_tftd_normalized(l_d, l_ave, tf):
     """ Computes the count of a term in a document:
     the number of times that term t occurs in document d """
-    k1 = 1.2 # term frequency scaling - how relevant tf is to the overall score
+    k1 = 1.5 # term frequency scaling - how relevant tf is to the overall score
     b1 = 0.75 # length normalization constant - scaling the term weight by document length
-    tftd = ((k1 + 1) * tf) / (k1 * ((1-b1) + b1 * (l_d/l_ave)) + tf) # normalize
+    tftd = ((k1 + 1) * tf) / ((k1 * ((1-b1) + b1 * (l_d/l_ave))) + tf) # normalize
     return tftd
 
 def intersect(term_postings_lists):
