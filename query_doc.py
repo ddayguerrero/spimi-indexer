@@ -23,6 +23,7 @@ def query_bm25():
     """ Setup BM25 ranking algorithm """
     result_query, result_documents = retrieve_result_set()
     if not result_documents is None:
+        print(result_documents)
         document_scores = QUERYHANDLER.compute_bm25(result_query, result_documents)
         for key, value in document_scores:
             print("Document: %s - Score: %s" % (key, value))
@@ -72,21 +73,26 @@ class QueryHandler:
         n = len(self.documents) # number of documents in the reuteurs corpus
         # print("N", n)
         for doc_id in documents:
-            # print("doc_id", doc_id[0])
+            #print("doc_id-----", doc_id[0])
             l_d = len(self.documents[str(doc_id[0])]) # length of document d
             # print("l_d", l_d)
             for term in query:
                 dft = len(self.spimi_index[term]) # document frequency of term
                 idf = compute_idf(n, dft) # inverse document frequency
                 tf = 0 # term frequency of term in document
-                if doc_id in self.spimi_index[term]:
-                    tf = doc_id[1]
+                # convert [[docId1, tf1],[docId2, tf2]] inner list to 
+                # dictionary { docId1: tf1, docId2: tf2 } for easy manipulation
+                doc_freq = {doc_tf[0]:doc_tf[1] for (key, doc_tf) in enumerate(self.spimi_index[term])}
+                if doc_id[0] in [doc_tf[0] for doc_tf in self.spimi_index[term]]:
+                    # print("doc_id", doc_id)
+                    # print("doc_freq", doc_freq[doc_id[0]])
+                    tf = doc_freq[doc_id[0]]
                 tftd = compute_tftd_normalized(l_d, l_ave, tf) # normalize tftd
                 if doc_id[0] in result_scores:
                     result_scores[doc_id[0]] += (idf * tftd)
                 else:
                     result_scores[doc_id[0]] = (idf * tftd)
-        result_scores = sorted(result_scores.items(), key=lambda x:x[1], reverse=True) # sort documents by decreasing score value
+        result_scores = sorted(result_scores.items(), key=lambda x:x[1]) # sort documents by decreasing score value
         return result_scores
 
     def execute(self, queryInput):
@@ -127,7 +133,7 @@ class QueryHandler:
             for term in terms:
                 if term in self.spimi_index:
                     tpls.append(self.spimi_index[term])
-                    # print(term, self.spimi_index[term])
+                    print(term, self.spimi_index[term])
                 else:
                     tpls.append([])
             if query_type == 'AND':
@@ -146,9 +152,9 @@ def compute_idf(n, dft):
 def compute_tftd_normalized(l_d, l_ave, tf):
     """ Computes the count of a term in a document:
     the number of times that term t occurs in document d """
-    k1 = 1.5 # term frequency scaling - how relevant tf is to the overall score
-    b1 = 0.75 # length normalization constant - scaling the term weight by document length
-    tftd = ((k1 + 1) * tf) / ((k1 * ((1-b1) + b1 * (l_d/l_ave))) + tf) # normalize
+    k1 = 10 # term frequency scaling - how relevant tf is to the overall score
+    b1 = 0.15 # length normalization constant - scaling the term weight by document length
+    tftd = ((k1 + 1) * tf) / ((k1 * ((1 - b1) + (b1 * (l_d / l_ave))) + tf)) # normalize
     return tftd
 
 def intersect(term_postings_lists):
