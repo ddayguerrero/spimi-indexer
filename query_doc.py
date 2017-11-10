@@ -78,6 +78,9 @@ class QueryHandler:
             # print("l_d", l_d)
             for term in query:
                 dft = len(self.spimi_index[term]) # document frequency of term
+                if dft == 0:
+                    print("term not found in index")
+                    continue
                 idf = compute_idf(n, dft) # inverse document frequency
                 tf = 0 # term frequency of term in document
                 # convert [[docId1, tf1],[docId2, tf2]] inner list to 
@@ -133,7 +136,7 @@ class QueryHandler:
             for term in terms:
                 if term in self.spimi_index:
                     tpls.append(self.spimi_index[term])
-                    print(term, self.spimi_index[term])
+                    # print(term, self.spimi_index[term])
                 else:
                     tpls.append([])
             if query_type == 'AND':
@@ -152,9 +155,9 @@ def compute_idf(n, dft):
 def compute_tftd_normalized(l_d, l_ave, tf):
     """ Computes the count of a term in a document:
     the number of times that term t occurs in document d """
-    k1 = 10 # term frequency scaling - how relevant tf is to the overall score
+    k1 = 1 # term frequency scaling - how relevant tf is to the overall score
     b1 = 0.15 # length normalization constant - scaling the term weight by document length
-    tftd = ((k1 + 1) * tf) / ((k1 * ((1 - b1) + (b1 * (l_d / l_ave))) + tf)) # normalize
+    tftd = ((k1 + 1) * tf) / ((k1 * ((1 - b1) + b1 * (float(l_d) / float(l_ave)))) + tf) # normalize
     return tftd
 
 def intersect(term_postings_lists):
