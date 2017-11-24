@@ -1,3 +1,3 @@
-#spimi-indexer
+## spimi-indexer
 
 Academic assignment for information retrieval course.
