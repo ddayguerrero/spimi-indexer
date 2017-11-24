@@ -69,17 +69,12 @@ class QueryHandler:
         print(("====================== Okapi-BM25 ======================="))
         result_scores = OrderedDict()
         l_ave = sum(len(document) for document in self.documents) / len(self.documents) # average length of all documents
-        # print("l_ave", l_ave)
         n = len(self.documents) # number of documents in the reuteurs corpus
-        # print("N", n)
         for doc_id in documents:
-            #print("doc_id-----", doc_id[0])
             l_d = len(self.documents[str(doc_id[0])]) # length of document d
-            # print("l_d", l_d)
             for term in query:
                 dft = len(self.spimi_index[term]) # document frequency of term
                 if dft == 0:
-                    print("term not found in index")
                     continue
                 idf = compute_idf(n, dft) # inverse document frequency
                 tf = 0 # term frequency of term in document
@@ -87,8 +82,6 @@ class QueryHandler:
                 # dictionary { docId1: tf1, docId2: tf2 } for easy manipulation
                 doc_freq = {doc_tf[0]:doc_tf[1] for (key, doc_tf) in enumerate(self.spimi_index[term])}
                 if doc_id[0] in [doc_tf[0] for doc_tf in self.spimi_index[term]]:
-                    # print("doc_id", doc_id)
-                    # print("doc_freq", doc_freq[doc_id[0]])
                     tf = doc_freq[doc_id[0]]
                 tftd = compute_tftd_normalized(l_d, l_ave, tf) # normalize tftd
                 if doc_id[0] in result_scores:
@@ -136,7 +129,6 @@ class QueryHandler:
             for term in terms:
                 if term in self.spimi_index:
                     tpls.append(self.spimi_index[term])
-                    # print(term, self.spimi_index[term])
                 else:
                     tpls.append([])
             if query_type == 'AND':
@@ -168,17 +160,13 @@ def intersect(term_postings_lists):
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len) # shortest
     remainder = sort_length_tpl[1:]
-    # print("result", result)
-    # print("remainder", remainder)
     if not remainder:
         remainder = None
     if not result:
         result = None
     while not remainder is None and not result is None:
         result = intersect_rest(result, remainder[0])
-        # print("result", result)
         remainder = remainder[1:]
-        # print("remainder", remainder)
         if not remainder:
             remainder = None
     return result
@@ -199,7 +187,6 @@ def intersect_rest(tpl1, tpl2):
             doc_id1 = next(iter_tpl1, None)
         else:
             doc_id2 = next(iter_tpl2, None)
-    # print("Intersection of two", answer)
     if not answer:
         return None
     return answer
@@ -210,17 +197,13 @@ def union(term_postings_lists):
     sort_length_tpl = sorted(sort_doc_tpl, key=len)
     result = min(term_postings_lists, key=len)
     remainder = sort_length_tpl[1:]
-    # print("result1", result)
-    # print("remainder1", remainder)
     if not remainder:
         remainder = None
     if not result:
         result = None
     while not remainder is None:
         result = union_rest(result, remainder[0])
-        # print("result2", result)
         remainder = remainder[1:]
-        # print("remainder2", remainder)
         if not remainder:
             remainder = None
     return result
@@ -238,11 +221,7 @@ def union_rest(tpl1, tpl2):
     else:
         iter_tpl2 = iter(tpl2)
         doc_id2 = next(iter_tpl2, None)
-    # print("doc_id1", doc_id1)
-    # print("doc_id2", doc_id2)
     while not doc_id1 is None or not doc_id2 is None:
-        # print("doc_id3", doc_id1)
-        # print("doc_id3", doc_id2)
         if doc_id1 is None:
             answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
@@ -259,7 +238,6 @@ def union_rest(tpl1, tpl2):
         else:
             answer.append(doc_id2)
             doc_id2 = next(iter_tpl2, None)
-    # print("Union of two", answer)
     if not answer:
         return None
     return answer
