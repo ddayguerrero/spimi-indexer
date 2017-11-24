@@ -1,1 +1,3 @@
-# comp479-p1
+#spimi-indexer
+
+Academic assignment for information retrieval course.
